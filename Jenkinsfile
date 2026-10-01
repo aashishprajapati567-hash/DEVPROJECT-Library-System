@@ -1,101 +1,102 @@
 pipeline {
-agent any
+    agent any
 
-environment {
-    PATH = "C:\\Users\\aashi\\AppData\\Local\\Python\\bin;C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
-    DOCKER_COMPOSE = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe"
-}
-
-stages {
-
-    stage('Checkout') {
-        steps {
-            checkout scm
-        }
+    environment {
+        PATH = "C:\\Users\\aashi\\AppData\\Local\\Python\\bin;C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        DOCKER_COMPOSE = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe"
     }
 
-    stage('Environment Check') {
-        steps {
-            bat 'whoami'
-            bat 'where python'
-            bat 'python --version'
-            bat 'where docker'
-            bat 'docker --version'
-            bat '"%DOCKER_COMPOSE%" version'
-        }
-    }
+    stages {
 
-    stage('Install Dependencies') {
-        parallel {
-
-            stage('Library Service Dependencies') {
-                steps {
-                    dir('library-service') {
-                        bat 'python -m pip install -r requirements.txt'
-                    }
-                }
-            }
-
-            stage('Inventory Service Dependencies') {
-                steps {
-                    dir('inventory-service') {
-                        bat 'python -m pip install -r requirements.txt'
-                    }
-                }
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
         }
-    }
 
-    stage('Automated Tests') {
-        parallel {
+        stage('Environment Check') {
+            steps {
+                bat 'whoami'
+                bat 'where python'
+                bat 'python --version'
+                bat 'where docker'
+                bat 'docker --version'
+                bat '"%DOCKER_COMPOSE%" version'
+            }
+        }
 
-            stage('Library Service Tests') {
-                steps {
-                    dir('library-service') {
-                        bat 'python -m pytest -v'
+        stage('Install Dependencies') {
+            parallel {
+
+                stage('Library Service Dependencies') {
+                    steps {
+                        dir('library-service') {
+                            bat 'python -m pip install -r requirements.txt'
+                        }
                     }
                 }
-            }
 
-            stage('Inventory Service Tests') {
-                steps {
-                    dir('inventory-service') {
-                        bat 'python -m pytest -v'
+                stage('Inventory Service Dependencies') {
+                    steps {
+                        dir('inventory-service') {
+                            bat 'python -m pip install -r requirements.txt'
+                        }
                     }
                 }
             }
         }
-    }
 
-    stage('Build Docker Images') {
-        steps {
-            bat '"%DOCKER_COMPOSE%" -f docker-compose.yml build'
+        stage('Automated Tests') {
+            parallel {
+
+                stage('Library Service Tests') {
+                    steps {
+                        dir('library-service') {
+                            bat 'python -m pytest -v'
+                        }
+                    }
+                }
+
+                stage('Inventory Service Tests') {
+                    steps {
+                        dir('inventory-service') {
+                            bat 'python -m pytest -v'
+                        }
+                    }
+                }
+            }
         }
-    }
 
-    stage('Tag Images') {
-        steps {
-            bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
-            bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
+        stage('Build Docker Images') {
+            steps {
+                bat '"%DOCKER_COMPOSE%" -f docker-compose.yml build'
+            }
         }
-    }
 
-    stage('Push Images to Artifact Repository') {
-        steps {
-            bat 'docker push localhost:5000/library-service:latest'
-            bat 'docker push localhost:5000/inventory-service:latest'
+        stage('Tag Images') {
+            steps {
+                bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
+                bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
+            }
         }
-    }
 
-    stage('Deploy with Docker Compose') {
-        steps {
-            bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml up -d'
+        stage('Push Images to Artifact Repository') {
+            steps {
+                bat 'docker push localhost:5000/library-service:latest'
+                bat 'docker push localhost:5000/inventory-service:latest'
+            }
         }
-    }
 
-    stage('Check Services') {
-        steps {
-            bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml ps'
+        stage('Deploy with Docker Compose') {
+            steps {
+                bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml up -d'
+            }
+        }
+
+        stage('Check Services') {
+            steps {
+                bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml ps'
+            }
         }
     }
 }
