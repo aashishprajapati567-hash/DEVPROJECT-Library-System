@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,7 +15,8 @@ pipeline {
 
         stage('Environment Check') {
             steps {
-                bat 'git --version'
+                bat 'whoami'
+                bat 'where docker'
                 bat 'docker --version'
                 bat 'docker compose version'
             }
