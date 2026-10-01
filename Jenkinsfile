@@ -1,9 +1,9 @@
 pipeline {
 agent any
 
-```
 environment {
     PATH = "C:\\Users\\aashi\\AppData\\Local\\Python\\bin;C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+    DOCKER_COMPOSE = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe"
 }
 
 stages {
@@ -21,7 +21,7 @@ stages {
             bat 'python --version'
             bat 'where docker'
             bat 'docker --version'
-            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" version'
+            bat '"%DOCKER_COMPOSE%" version'
         }
     }
 
@@ -69,7 +69,7 @@ stages {
 
     stage('Build Docker Images') {
         steps {
-            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -f docker-compose.yml build'
+            bat '"%DOCKER_COMPOSE%" -f docker-compose.yml build'
         }
     }
 
@@ -89,16 +89,13 @@ stages {
 
     stage('Deploy with Docker Compose') {
         steps {
-            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml up -d'
+            bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml up -d'
         }
     }
 
     stage('Check Services') {
         steps {
-            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml ps'
+            bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml ps'
         }
     }
-}
-```
-
 }
