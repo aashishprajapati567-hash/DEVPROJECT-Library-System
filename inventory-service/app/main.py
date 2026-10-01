@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from .database import Base, engine
 from .routers.inventory import router as inventory_router
 from .routers import auth
@@ -25,6 +27,9 @@ app = FastAPI(
     description="Book Inventory Microservice for Library Management",
     version="1.0.0"
 )
+
+# Enable Prometheus metrics
+Instrumentator().instrument(app).expose(app)
 
 
 # Attach limiter
