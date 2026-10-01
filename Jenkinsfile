@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -18,7 +19,7 @@ pipeline {
                 bat 'whoami'
                 bat 'where docker'
                 bat 'docker --version'
-                bat 'docker compose version'
+                bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" version'
             }
         }
 
@@ -45,7 +46,7 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                bat 'docker compose -f docker-compose.yml build'
+                bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -f docker-compose.yml build'
             }
         }
 
@@ -65,14 +66,15 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                bat 'docker compose -p devproject -f docker-compose.yml up -d'
+                bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml up -d'
             }
         }
 
         stage('Check Services') {
             steps {
-                bat 'docker compose -p devproject -f docker-compose.yml ps'
+                bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml ps'
             }
         }
     }
 }
+```
