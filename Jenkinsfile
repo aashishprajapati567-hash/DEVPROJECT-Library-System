@@ -2,7 +2,10 @@ pipeline {
     agent any
 
     environment {
-        PATH = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        DOCKER_PATH = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+        PYTHON_PATH = "C:\\Users\\aashi\\AppData\\Local\\Python\\bin"
+
+        PATH = "${env.PYTHON_PATH};${env.DOCKER_PATH};${env.PATH}"
     }
 
     stages {
@@ -16,8 +19,16 @@ pipeline {
         stage('Environment Check') {
             steps {
                 bat 'whoami'
+                bat 'git --version'
+
+                bat 'where python'
+                bat 'python --version'
+
+                bat 'python -m pytest --version'
+
                 bat 'where docker'
                 bat 'docker --version'
+
                 bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" version'
             }
         }
