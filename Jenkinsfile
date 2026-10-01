@@ -46,8 +46,8 @@ pipeline {
 
         stage('Tag Images') {
             steps {
-                bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
-                bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
+                bat 'docker tag devproject-library-system-library-service:latest localhost:5000/library-service:latest'
+                bat 'docker tag devproject-library-system-inventory-service:latest localhost:5000/inventory-service:latest'
             }
         }
 
