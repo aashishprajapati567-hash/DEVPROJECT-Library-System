@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 import httpx
 import os
 
+from prometheus_fastapi_instrumentator import Instrumentator
 from .database import Base, engine, get_db
 from .models import Book, Loan
 from .routers.books import router as books_router
@@ -40,6 +41,7 @@ app = FastAPI(
     description="Library Management Microservice using FastAPI, SQLite, JWT and Rate Limiting",
     version="1.0.0"
 )
+Instrumentator().instrument(app).expose(app)
 
 
 # =====================================

@@ -13,27 +13,61 @@ pipeline {
             steps {
                 bat 'git --version'
                 bat 'docker --version'
-                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" version'
+                bat 'docker compose version'
+            }
+        }
+
+        stage('Automated Tests') {
+            parallel {
+
+                stage('Library Service Tests') {
+                    steps {
+                        dir('library-service') {
+                            bat 'python -m pytest -v'
+                        }
+                    }
+                }
+
+                stage('Inventory Service Tests') {
+                    steps {
+                        dir('inventory-service') {
+                            bat 'python -m pytest -v'
+                        }
+                    }
+                }
             }
         }
 
         stage('Build Docker Images') {
-         // Run the build script
             steps {
-                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -f docker-compose.yml build'
+                bat 'docker compose -f docker-compose.yml build'
             }
         }
 
-        stage('Deploy') {
-    	    steps {
-                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p   devproject -f docker-compose.yml up -d'
-           }
+        stage('Tag Images') {
+            steps {
+                bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
+                bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
+            }
+        }
+
+        stage('Push Images to Artifact Repository') {
+            steps {
+                bat 'docker push localhost:5000/library-service:latest'
+                bat 'docker push localhost:5000/inventory-service:latest'
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                bat 'docker compose -p devproject -f docker-compose.yml up -d'
+            }
         }
 
         stage('Check Services') {
-    	     steps {
-                 bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p devproject -f docker-compose.yml ps'
-           }
+            steps {
+                bat 'docker compose -p devproject -f docker-compose.yml ps'
+            }
         }
     }
 }
