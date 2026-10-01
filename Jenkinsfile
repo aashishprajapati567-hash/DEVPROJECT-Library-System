@@ -12,8 +12,9 @@ stages {
     stage('Environment Check') {
         steps {
             bat 'git --version'
-            bat 'docker --version'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" --version'
             bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" version'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Python\\bin\\python.exe" --version'
         }
     }
 
@@ -46,15 +47,15 @@ stages {
 
     stage('Tag Images') {
         steps {
-            bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
-            bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" tag devproject-library-service:latest localhost:5000/library-service:latest'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
         }
     }
 
     stage('Push Images to Artifact Repository') {
         steps {
-            bat 'docker push localhost:5000/library-service:latest'
-            bat 'docker push localhost:5000/inventory-service:latest'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" push localhost:5000/library-service:latest'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" push localhost:5000/inventory-service:latest'
         }
     }
 
@@ -70,4 +71,5 @@ stages {
         }
     }
 }
+
 }
