@@ -1,102 +1,72 @@
 pipeline {
-    agent any
+agent any
 
-    environment {
-        PATH = "C:\\Users\\aashi\\AppData\\Local\\Python\\bin;C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
-        DOCKER_COMPOSE = "C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe"
+stages {
+
+    stage('Checkout') {
+        steps {
+            checkout scm
+        }
     }
 
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
+    stage('Environment Check') {
+        steps {
+            bat 'git --version'
+            bat 'docker --version'
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" version'
         }
+    }
 
-        stage('Environment Check') {
-            steps {
-                bat 'whoami'
-                bat 'where python'
-                bat 'python --version'
-                bat 'where docker'
-                bat 'docker --version'
-                bat '"%DOCKER_COMPOSE%" version'
-            }
-        }
+    stage('Automated Tests') {
+        parallel {
 
-        stage('Install Dependencies') {
-            parallel {
-
-                stage('Library Service Dependencies') {
-                    steps {
-                        dir('library-service') {
-                            bat 'python -m pip install -r requirements.txt'
-                        }
+            stage('Library Service Tests') {
+                steps {
+                    dir('library-service') {
+                        bat '"C:\\Users\\aashi\\AppData\\Local\\Python\\bin\\python.exe" -m pytest -v'
                     }
                 }
+            }
 
-                stage('Inventory Service Dependencies') {
-                    steps {
-                        dir('inventory-service') {
-                            bat 'python -m pip install -r requirements.txt'
-                        }
+            stage('Inventory Service Tests') {
+                steps {
+                    dir('inventory-service') {
+                        bat '"C:\\Users\\aashi\\AppData\\Local\\Python\\bin\\python.exe" -m pytest -v'
                     }
                 }
             }
         }
+    }
 
-        stage('Automated Tests') {
-            parallel {
-
-                stage('Library Service Tests') {
-                    steps {
-                        dir('library-service') {
-                            bat 'python -m pytest -v'
-                        }
-                    }
-                }
-
-                stage('Inventory Service Tests') {
-                    steps {
-                        dir('inventory-service') {
-                            bat 'python -m pytest -v'
-                        }
-                    }
-                }
-            }
+    stage('Build Docker Images') {
+        steps {
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -f docker-compose.yml build'
         }
+    }
 
-        stage('Build Docker Images') {
-            steps {
-                bat '"%DOCKER_COMPOSE%" -f docker-compose.yml build'
-            }
+    stage('Tag Images') {
+        steps {
+            bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
+            bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
         }
+    }
 
-        stage('Tag Images') {
-            steps {
-                bat 'docker tag devproject-library-service:latest localhost:5000/library-service:latest'
-                bat 'docker tag devproject-inventory-service:latest localhost:5000/inventory-service:latest'
-            }
+    stage('Push Images to Artifact Repository') {
+        steps {
+            bat 'docker push localhost:5000/library-service:latest'
+            bat 'docker push localhost:5000/inventory-service:latest'
         }
+    }
 
-        stage('Push Images to Artifact Repository') {
-            steps {
-                bat 'docker push localhost:5000/library-service:latest'
-                bat 'docker push localhost:5000/inventory-service:latest'
-            }
+    stage('Deploy with Docker Compose') {
+        steps {
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml up -d'
         }
+    }
 
-        stage('Deploy with Docker Compose') {
-            steps {
-                bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml up -d'
-            }
-        }
-
-        stage('Check Services') {
-            steps {
-                bat '"%DOCKER_COMPOSE%" -p devproject -f docker-compose.yml ps'
-            }
+    stage('Check Services') {
+        steps {
+            bat '"C:\\Users\\aashi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" -p devproject -f docker-compose.yml ps'
         }
     }
 }
